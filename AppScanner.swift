@@ -59,3 +59,14 @@ extension AppScanner {
         return png
     }
 }
+
+extension AppScanner {
+    static func launch(appAtPath path: String) -> Bool {
+        let url = URL(fileURLWithPath: path)
+        var success = true
+        NSWorkspace.shared.openApplication(at: url, configuration: NSWorkspace.OpenConfiguration()) { _, error in
+            if error != nil { success = false }
+        }
+        return success
+    }
+}
