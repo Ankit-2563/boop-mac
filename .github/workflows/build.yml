@@ -13,17 +13,5 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Xcode
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: '15'
-
-      - name: Build
-        run: |
-          xcodebuild build \
-            -project Boop.xcodeproj \
-            -scheme Boop \
-            -configuration Debug \
-            -destination 'platform=macOS' \
-            CODE_SIGN_IDENTITY="-" \
-            CODE_SIGNING_REQUIRED=NO
+      - name: Build with Swift Package Manager
+        run: swift build -c release
