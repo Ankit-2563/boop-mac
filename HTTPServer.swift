@@ -23,3 +23,11 @@ final class DockHTTPServer {
         server.stop()
     }
 }
+
+extension DockHTTPServer {
+    func isAuthorized(_ request: HttpRequest) -> Bool {
+        guard !pairingToken.isEmpty else { return false }
+        let header = request.headers["x-dock-token"]
+        return header == pairingToken
+    }
+}
