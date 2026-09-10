@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Allow incoming connections (phone → Mac HTTP server) -->
+    <key>com.apple.security.network.server</key>
+    <true/>
+    <!-- Allow outgoing connections (for future features like update checks) -->
+    <key>com.apple.security.network.client</key>
+    <true/>
+    <!-- App Sandbox -->
+    <key>com.apple.security.app-sandbox</key>
+    <true/>
+</dict>
+</plist>
