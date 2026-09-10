@@ -158,9 +158,5 @@ private extension HttpResponse {
         })
     }
 
-    static var forbidden: HttpResponse {
-        .raw(403, "Forbidden", nil, { writer in
-            try? writer.write("forbidden".data(using: .utf8)!)
-        })
-    }
+
 }
