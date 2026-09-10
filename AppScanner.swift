@@ -8,6 +8,8 @@ struct InstalledApp: Codable, Hashable {
 }
 
 enum AppScanner {
+
+    /// Scans the standard locations for installed .app bundles.
     static func scanInstalledApps() -> [InstalledApp] {
         let fileManager = FileManager.default
         let searchDirs = [
@@ -36,37 +38,46 @@ enum AppScanner {
 
         return results.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
     }
-}
 
-extension AppScanner {
+    /// Renders an app's icon as PNG data, resized to a reasonable size for phone display.
+    /// Uses NSGraphicsContext instead of the deprecated lockFocus/unlockFocus APIs.
     static func iconPNGData(forAppAtPath path: String, size: CGFloat = 256) -> Data? {
         let icon = NSWorkspace.shared.icon(forFile: path)
         let targetSize = NSSize(width: size, height: size)
 
-        let resized = NSImage(size: targetSize)
-        resized.lockFocus()
+        guard let rep = NSBitmapImageRep(
+            bitmapDataPlanes: nil,
+            pixelsWide: Int(size),
+            pixelsHigh: Int(size),
+            bitsPerSample: 8,
+            samplesPerPixel: 4,
+            hasAlpha: true,
+            isPlanar: false,
+            colorSpaceName: .deviceRGB,
+            bytesPerRow: 0,
+            bitsPerPixel: 0
+        ) else { return nil }
+
+        rep.size = targetSize
+
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep)
         icon.draw(in: NSRect(origin: .zero, size: targetSize),
                   from: NSRect(origin: .zero, size: icon.size),
                   operation: .copy,
                   fraction: 1.0)
-        resized.unlockFocus()
+        NSGraphicsContext.restoreGraphicsState()
 
-        guard let tiff = resized.tiffRepresentation,
-              let rep = NSBitmapImageRep(data: tiff),
-              let png = rep.representation(using: .png, properties: [:]) else {
-            return nil
-        }
-        return png
+        return rep.representation(using: .png, properties: [:])
     }
-}
 
-extension AppScanner {
-    static func launch(appAtPath path: String) -> Bool {
+    /// Launches an app by path, with proper async completion handling.
+    static func launch(appAtPath path: String, completion: @escaping (Bool) -> Void) {
         let url = URL(fileURLWithPath: path)
-        var success = true
         NSWorkspace.shared.openApplication(at: url, configuration: NSWorkspace.OpenConfiguration()) { _, error in
-            if error != nil { success = false }
+            DispatchQueue.main.async {
+                completion(error == nil)
+            }
         }
-        return success
     }
 }
