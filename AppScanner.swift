@@ -37,3 +37,25 @@ enum AppScanner {
         return results.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
     }
 }
+
+extension AppScanner {
+    static func iconPNGData(forAppAtPath path: String, size: CGFloat = 256) -> Data? {
+        let icon = NSWorkspace.shared.icon(forFile: path)
+        let targetSize = NSSize(width: size, height: size)
+
+        let resized = NSImage(size: targetSize)
+        resized.lockFocus()
+        icon.draw(in: NSRect(origin: .zero, size: targetSize),
+                  from: NSRect(origin: .zero, size: icon.size),
+                  operation: .copy,
+                  fraction: 1.0)
+        resized.unlockFocus()
+
+        guard let tiff = resized.tiffRepresentation,
+              let rep = NSBitmapImageRep(data: tiff),
+              let png = rep.representation(using: .png, properties: [:]) else {
+            return nil
+        }
+        return png
+    }
+}
