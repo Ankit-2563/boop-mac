@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Menu-bar-only app: hide from Dock -->
+    <key>LSUIElement</key>
+    <true/>
+
+    <!-- App metadata -->
+    <key>CFBundleName</key>
+    <string>Boop</string>
+    <key>CFBundleDisplayName</key>
+    <string>Boop</string>
+    <key>CFBundleIdentifier</key>
+    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+    <key>CFBundleVersion</key>
+    <string>$(CURRENT_PROJECT_VERSION)</string>
+    <key>CFBundleShortVersionString</key>
+    <string>$(MARKETING_VERSION)</string>
+    <key>CFBundlePackageType</key>
+    <string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
+    <key>CFBundleExecutable</key>
+    <string>$(EXECUTABLE_NAME)</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>$(MACOSX_DEPLOYMENT_TARGET)</string>
+
+    <!-- Local network access for phone communication -->
+    <key>NSLocalNetworkUsageDescription</key>
+    <string>Boop needs local network access so your phone can find and launch apps on this Mac.</string>
+
+    <!-- Bonjour service advertisement -->
+    <key>NSBonjourServices</key>
+    <array>
+        <string>_boop._tcp</string>
+    </array>
+</dict>
+</plist>
