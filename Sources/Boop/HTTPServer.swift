@@ -101,6 +101,25 @@ final class DockHTTPServer {
         server.stop()
     }
 
+    /// Returns the Mac's local IPv4 address (e.g. 192.168.x.x) using POSIX getifaddrs.
+    static func localIPAddress() -> String? {
+        var ifaddr: UnsafeMutablePointer<ifaddrs>?
+        guard getifaddrs(&ifaddr) == 0, let firstAddr = ifaddr else { return nil }
+        defer { freeifaddrs(ifaddr) }
+
+        for ptr in sequence(first: firstAddr, next: { $0.pointee.ifa_next }) {
+            let sa = ptr.pointee.ifa_addr.pointee
+            guard sa.sa_family == UInt8(AF_INET) else { continue }
+            let name = String(cString: ptr.pointee.ifa_name)
+            guard name == "en0" || name == "en1" else { continue }
+            var addr = ptr.pointee.ifa_addr.pointee
+            var hostname = [CChar](repeating: 0, count: Int(NI_MAXHOST))
+            getnameinfo(&addr, socklen_t(sa.sa_len), &hostname, socklen_t(hostname.count), nil, 0, NI_NUMERICHOST)
+            return String(cString: hostname)
+        }
+        return nil
+    }
+
     // MARK: - Auth
 
     private func isAuthorized(_ request: HttpRequest) -> Bool {
