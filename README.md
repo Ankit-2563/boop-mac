@@ -18,9 +18,12 @@ Downloadable builds for macOS will be hosted on the official Boop website (comin
 
 ## How It Works
 
-1. **Local WiFi Discovery**: Advertises via Bonjour (`_boop._tcp`) so your phone automatically detects your Mac on the same network.
-2. **Pair Once**: Enter the 6-digit code shown in your menu bar into the Android app.
-3. **Launch Apps**: Browse all installed Mac applications from your phone and launch them instantly.
+1. **Instant QR Pairing**: Click **Show QR Code** in the menu bar. The floating window presents a high-resolution QR code encoding your local IP and authentication token.
+2. **Scan & Pair**: Scan the QR code with Boop on your Android phone for instant, zero-configuration connection.
+3. **Manual Fallback**: If preferred, enter the displayed local IP address and 6-digit PIN manually.
+4. **Launch Apps**: Tap any app on your phone's dock to launch it instantly on your Mac.
+
+See [docs/PAIRING_PROTOCOL.md](docs/PAIRING_PROTOCOL.md) for full technical details on the pairing schema and HTTP endpoints.
 
 ---
 
