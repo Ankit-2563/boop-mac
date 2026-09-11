@@ -15,13 +15,7 @@ let package = Package(
             dependencies: [
                 .product(name: "Swifter", package: "swifter")
             ],
-            path: ".",
-            sources: [
-                "AppDelegate.swift",
-                "AppScanner.swift",
-                "HTTPServer.swift",
-                "Boop/BoopApp.swift"
-            ]
+            path: "Sources/Boop"
         )
     ]
 )
