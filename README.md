@@ -50,6 +50,11 @@ To build a release binary:
 swift build -c release
 ```
 
+To build a standalone `.app` bundle:
+```bash
+./scripts/build-app.sh
+```
+
 ---
 
 ## License
