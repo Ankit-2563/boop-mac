@@ -1,6 +1,5 @@
 # Boop — Mac Companion
 
-[![Release](https://img.shields.io/github/v/release/Ankit-2563/boop-mac?color=blue&label=macOS%20Release)](https://github.com/Ankit-2563/boop-mac/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 **Menu bar app that lets your Android phone launch Mac apps.**
@@ -9,12 +8,11 @@ Boop runs as an invisible menu-bar companion on your Mac. It serves a tiny, secu
 
 ---
 
-## 🚀 Quick Download & Install
+## 💻 Getting Started
 
-1. Download **[Boop-macOS.zip](https://github.com/Ankit-2563/boop-mac/releases/latest/download/Boop-macOS.zip)**.
-2. Unzip and drag **Boop.app** into your `/Applications` folder.
-3. Launch **Boop.app**.
-4. Look for the dock icon in your **menu bar** (top right) — click it to see your 6-digit pairing code!
+The Boop companion runs in your menu bar. 
+
+Downloadable builds for macOS will be hosted on the official Boop website (coming soon). You can also build and run directly from source below.
 
 ---
 
