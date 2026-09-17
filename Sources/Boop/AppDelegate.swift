@@ -1,20 +1,37 @@
 import Cocoa
 
+struct PairedDevice {
+    var name: String
+    var lastSeen: Date
+
+    var isOnline: Bool {
+        Date().timeIntervalSince(lastSeen) <= 15
+    }
+}
+
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
     private let httpServer = DockHTTPServer()
     private var bonjourService: NetService?
     private let tokenKey = "com.boop.pairingToken"
+    private let pairedDeviceNameKey = "com.boop.pairedDeviceName"
     private var qrPanel: QRPanel?
+
+    private var pairedDevice: PairedDevice?
+    private var statusTimer: Timer?
+    private var lastReportedOnlineState: Bool?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         setupStatusItem()
         loadOrCreateToken()
+        loadPairedDevice()
         httpServer.start()
         advertiseBonjour()
+        startStatusTimer()
     }
 
     func applicationWillTerminate(_ notification: Notification) {
+        statusTimer?.invalidate()
         httpServer.stop()
         bonjourService?.stop()
     }
@@ -38,6 +55,27 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(NSMenuItem(title: "Quit Boop", action: #selector(quit), keyEquivalent: "q"))
 
         statusItem.menu = menu
+    }
+
+    // MARK: - Pairing State & Status Timer
+
+    private func loadPairedDevice() {
+        if let name = UserDefaults.standard.string(forKey: pairedDeviceNameKey), !name.isEmpty {
+            pairedDevice = PairedDevice(name: name, lastSeen: .distantPast)
+            lastReportedOnlineState = false
+            rebuildMenu()
+        }
+    }
+
+    private func startStatusTimer() {
+        statusTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
+            guard let self, let device = self.pairedDevice else { return }
+            let currentOnline = device.isOnline
+            if self.lastReportedOnlineState != currentOnline {
+                self.lastReportedOnlineState = currentOnline
+                self.rebuildMenu()
+            }
+        }
     }
 
     // MARK: - Pairing & QR Window
