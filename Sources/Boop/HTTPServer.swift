@@ -95,6 +95,9 @@ final class DockHTTPServer {
             guard self.checkRateLimit(endpoint: "/apps") else {
                 return .raw(429, "Too Many Requests", nil, nil)
             }
+            DispatchQueue.main.async {
+                self.onHeartbeat?(request.headers["x-device-name"] ?? "")
+            }
             let apps = AppScanner.scanInstalledApps()
 
             // Cache known paths for /launch and /icon validation.
@@ -108,6 +111,9 @@ final class DockHTTPServer {
             guard let self, self.isAuthorized(request) else { return .unauthorized(headers: nil) }
             guard self.checkRateLimit(endpoint: "/icon") else {
                 return .raw(429, "Too Many Requests", nil, nil)
+            }
+            DispatchQueue.main.async {
+                self.onHeartbeat?(request.headers["x-device-name"] ?? "")
             }
             guard let rawPath = request.queryParams.first(where: { $0.0 == "path" })?.1,
                   let decodedPath = rawPath.removingPercentEncoding else {
@@ -131,6 +137,9 @@ final class DockHTTPServer {
             guard let self, self.isAuthorized(request) else { return .unauthorized(headers: nil) }
             guard self.checkRateLimit(endpoint: "/launch") else {
                 return .raw(429, "Too Many Requests", nil, nil)
+            }
+            DispatchQueue.main.async {
+                self.onHeartbeat?(request.headers["x-device-name"] ?? "")
             }
             guard let bodyString = String(bytes: request.body, encoding: .utf8),
                   let data = bodyString.data(using: .utf8),
