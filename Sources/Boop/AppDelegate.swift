@@ -25,6 +25,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         setupStatusItem()
         loadOrCreateToken()
         loadPairedDevice()
+        setupServerCallbacks()
         httpServer.start()
         advertiseBonjour()
         startStatusTimer()
@@ -57,7 +58,34 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem.menu = menu
     }
 
-    // MARK: - Pairing State & Status Timer
+    // MARK: - Server Callbacks & Pairing State
+
+    private func setupServerCallbacks() {
+        httpServer.onDevicePair = { [weak self] name in
+            guard let self else { return }
+            self.pairedDevice = PairedDevice(name: name, lastSeen: Date())
+            UserDefaults.standard.set(name, forKey: self.pairedDeviceNameKey)
+            self.lastReportedOnlineState = true
+            self.rebuildMenu()
+        }
+
+        httpServer.onHeartbeat = { [weak self] name in
+            guard let self else { return }
+            let currentName = (!name.isEmpty) ? name : (self.pairedDevice?.name ?? "Android Device")
+            let wasOnline = self.pairedDevice?.isOnline ?? false
+            self.pairedDevice = PairedDevice(name: currentName, lastSeen: Date())
+            UserDefaults.standard.set(currentName, forKey: self.pairedDeviceNameKey)
+            if !wasOnline {
+                self.lastReportedOnlineState = true
+                self.rebuildMenu()
+            }
+        }
+
+        httpServer.onDeviceUnpair = { [weak self] in
+            guard let self else { return }
+            self.unpairDevice()
+        }
+    }
 
     private func loadPairedDevice() {
         if let name = UserDefaults.standard.string(forKey: pairedDeviceNameKey), !name.isEmpty {
@@ -76,6 +104,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 self.rebuildMenu()
             }
         }
+    }
+
+    @objc private func unpairDevice() {
+        pairedDevice = nil
+        lastReportedOnlineState = nil
+        UserDefaults.standard.removeObject(forKey: pairedDeviceNameKey)
+        regenerateAndRefresh()
     }
 
     // MARK: - Pairing & QR Window
