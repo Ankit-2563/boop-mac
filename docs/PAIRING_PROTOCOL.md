@@ -52,6 +52,52 @@ Checks connectivity and returns host metadata.
 }
 ```
 
+### `POST /pair`
+Registers the mobile device name with the Mac companion and establishes paired state.
+- **Authentication**: Required (`X-Dock-Token: <token>`)
+- **Body**:
+```json
+{
+  "deviceName": "Google Pixel 8 Pro"
+}
+```
+- **Response**: `200 OK`
+```json
+{
+  "status": "paired",
+  "macName": "Ankit's MacBook Pro"
+}
+```
+
+### `POST /heartbeat`
+Periodic heartbeat sent by the connected mobile device to update presence/online status.
+- **Authentication**: Required (`X-Dock-Token: <token>`)
+- **Body**:
+```json
+{
+  "deviceName": "Google Pixel 8 Pro"
+}
+```
+- **Response**: `200 OK`
+```json
+{
+  "status": "ok",
+  "paired": true,
+  "macName": "Ankit's MacBook Pro"
+}
+```
+- **Error Response**: `401 Unauthorized` if the device has been unpaired on the Mac.
+
+### `POST /unpair`
+Explicitly unpairs the device, invalidating the pairing token and resetting Mac companion state.
+- **Authentication**: Required (`X-Dock-Token: <token>`)
+- **Response**: `200 OK`
+```json
+{
+  "status": "unpaired"
+}
+```
+
 ### `GET /apps`
 Lists installed macOS applications available in `/Applications` and `~/Applications`.
 - **Authentication**: Required (`X-Dock-Token: <token>`)
