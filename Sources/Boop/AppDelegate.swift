@@ -49,8 +49,33 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private func rebuildMenu() {
         let menu = NSMenu()
 
+        if let device = pairedDevice {
+            let isOnline = device.isOnline
+            let statusText = isOnline ? "Online" : "Offline"
+            let dot = isOnline ? "🟢" : "⚪"
+
+            let deviceItem = NSMenuItem(
+                title: "\(dot) \(device.name) (\(statusText))",
+                action: nil,
+                keyEquivalent: ""
+            )
+            deviceItem.isEnabled = false
+            menu.addItem(deviceItem)
+
+            let unpairItem = NSMenuItem(
+                title: "Unpair",
+                action: #selector(unpairDevice),
+                keyEquivalent: "u"
+            )
+            menu.addItem(unpairItem)
+
+            menu.addItem(NSMenuItem.separator())
+            statusItem.button?.toolTip = "Boop — \(device.name) (\(statusText))"
+        } else {
+            statusItem.button?.toolTip = "Boop — No Device Paired"
+        }
+
         menu.addItem(NSMenuItem(title: "Show QR Code", action: #selector(showQRWindow), keyEquivalent: ""))
-        menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "Regenerate Code", action: #selector(regenerateAndRefresh), keyEquivalent: "r"))
         menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "Quit Boop", action: #selector(quit), keyEquivalent: "q"))
@@ -137,6 +162,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let newToken = generateToken()
         httpServer.pairingToken = newToken
         UserDefaults.standard.set(newToken, forKey: tokenKey)
+        pairedDevice = nil
+        lastReportedOnlineState = nil
+        UserDefaults.standard.removeObject(forKey: pairedDeviceNameKey)
+        rebuildMenu()
         if let panel = qrPanel, panel.isVisible {
             panel.update(with: currentPayload)
         }
