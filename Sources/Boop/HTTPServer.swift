@@ -35,6 +35,60 @@ final class DockHTTPServer {
             return .ok(.json(body))
         }
 
+        // Pair endpoint: phone sends its device name after verifying PIN or scanning QR.
+        server["/pair"] = { [weak self] request in
+            guard let self, self.isAuthorized(request) else { return .unauthorized(headers: nil) }
+            var deviceName = "Android Device"
+            if let bodyString = String(bytes: request.body, encoding: .utf8),
+               let data = bodyString.data(using: .utf8),
+               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let name = json["deviceName"] as? String, !name.trimmingCharacters(in: .whitespaces).isEmpty {
+                deviceName = name.trimmingCharacters(in: .whitespaces)
+            } else if let headerName = request.headers["x-device-name"], !headerName.isEmpty {
+                deviceName = headerName
+            }
+            DispatchQueue.main.async {
+                self.onDevicePair?(deviceName)
+            }
+            let body: [String: Any] = [
+                "status": "paired",
+                "macName": Host.current().localizedName ?? "Mac"
+            ]
+            return .ok(.json(body))
+        }
+
+        // Heartbeat endpoint: phone periodically pings to maintain online status.
+        server["/heartbeat"] = { [weak self] request in
+            guard let self, self.isAuthorized(request) else { return .unauthorized(headers: nil) }
+            var deviceName = ""
+            if let bodyString = String(bytes: request.body, encoding: .utf8),
+               let data = bodyString.data(using: .utf8),
+               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let name = json["deviceName"] as? String {
+                deviceName = name.trimmingCharacters(in: .whitespaces)
+            } else if let headerName = request.headers["x-device-name"] {
+                deviceName = headerName
+            }
+            DispatchQueue.main.async {
+                self.onHeartbeat?(deviceName)
+            }
+            let body: [String: Any] = [
+                "status": "ok",
+                "paired": true,
+                "macName": Host.current().localizedName ?? "Mac"
+            ]
+            return .ok(.json(body))
+        }
+
+        // Unpair endpoint: phone explicitly unpairs.
+        server["/unpair"] = { [weak self] request in
+            guard let self, self.isAuthorized(request) else { return .unauthorized(headers: nil) }
+            DispatchQueue.main.async {
+                self.onDeviceUnpair?()
+            }
+            return .ok(.json(["status": "unpaired"]))
+        }
+
         // Everything below requires the correct pairing token.
         server["/apps"] = { [weak self] request in
             guard let self, self.isAuthorized(request) else { return .unauthorized(headers: nil) }
