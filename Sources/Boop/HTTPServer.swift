@@ -8,12 +8,17 @@ final class DockHTTPServer {
     /// Set/read by AppDelegate — the phone must send this in the X-Dock-Token header.
     var pairingToken: String = ""
 
+    /// Callbacks invoked on device lifecycle events
+    var onDevicePair: ((String) -> Void)?
+    var onHeartbeat: ((String) -> Void)?
+    var onDeviceUnpair: (() -> Void)?
+
     /// Cache of known app paths for validation (refreshed on each /apps call).
     private var knownAppPaths: Set<String> = []
 
     /// Simple rate limiter: tracks request timestamps per endpoint.
     private var requestLog: [String: [Date]] = [:]
-    private let maxRequestsPerMinute = 60
+    private let maxRequestsPerMinute = 120
     private let rateLimitQueue = DispatchQueue(label: "com.boop.ratelimit")
 
     func start() {
